@@ -160,6 +160,7 @@ bool InflateBlock(unsigned char* pStream, unsigned int* pPos, unsigned char** pO
     strm.opaque = Z_NULL;
 
     if (inflateInit(&strm) != Z_OK) {
+        printf("Error starting inflation\n");
         // Error starting inflation
         return false;
     }
@@ -179,6 +180,7 @@ bool InflateBlock(unsigned char* pStream, unsigned int* pPos, unsigned char** pO
         return true;
     }
     else if (ret != Z_OK) {
+        printf("Error Inflating\n");
         // Error inflating
         inflateEnd(&strm);
         return false;
@@ -352,6 +354,7 @@ bool GameLoad(const char* pFilename) {
     }
 
     if (!version) {
+        printf("This is not a GameMaker 8 or 8.1 game!\n");
         // No game version found
         delete[] buffer;
         return false;
@@ -368,6 +371,7 @@ bool GameLoad(const char* pFilename) {
     pos += 4;
     if (!InflateBlock(buffer, &pos, &data, &dataLength, &outputSize)) {
         // Error reading settings block
+        printf("Error reading settings block\n");
         free(data);
         delete[] buffer;
         return false;
@@ -470,14 +474,15 @@ bool GameLoad(const char* pFilename) {
             settings.errorOnUninitialization = true;
         }
     }
-
+    printf("Settings\n");
     // Skip over the D3D wrapper
     pos += ReadDword(buffer, &pos);
     pos += ReadDword(buffer, &pos);
-
+    printf("no d3d_ :(\n");
     // There's yet another encryption layer on the rest of the data paragraphs.
     if (!DecryptData(buffer, &pos)) {
         // Error decrypting
+        printf("error decrypting\n");
         free(data);
         delete[] buffer;
         return false;
@@ -494,6 +499,7 @@ bool GameLoad(const char* pFilename) {
     unsigned int count = ReadDword(buffer, &pos);
     if (count) charTable = ( unsigned char* )malloc(0x200);
     AssetManager::ReserveExtensions(count);
+    printf("Get Extensions\n");
     for (; count > 0; count--) {
         Extension* extension = AssetManager::AddExtension();
 
@@ -597,6 +603,7 @@ bool GameLoad(const char* pFilename) {
 
     // Triggers
 
+    printf("Get Triggers\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     unsigned int triggerCount = count;
@@ -630,7 +637,7 @@ bool GameLoad(const char* pFilename) {
 
 
     // Constants
-
+    printf("Get Constants\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     AssetManager::ReserveConstants(count);
@@ -642,7 +649,7 @@ bool GameLoad(const char* pFilename) {
 
 
     // Sounds
-
+    printf("Get Sounds\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     AssetManager::ReserveSounds(count);
@@ -688,7 +695,7 @@ bool GameLoad(const char* pFilename) {
 
 
     // Sprites
-
+    printf("Get Sprites\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     AssetManager::ReserveSprites(count);
@@ -807,7 +814,7 @@ bool GameLoad(const char* pFilename) {
 
 
     // Backgrounds
-
+    printf("Get Backgrounds\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     AssetManager::ReserveBackgrounds(count);
@@ -852,7 +859,7 @@ bool GameLoad(const char* pFilename) {
 
 
     // Paths
-
+    printf("Get Paths\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     AssetManager::ReservePaths(count);
@@ -892,7 +899,7 @@ bool GameLoad(const char* pFilename) {
 
 
     // Scripts
-
+    printf("Get Scripts\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     unsigned int scriptCount = count;
@@ -924,7 +931,7 @@ bool GameLoad(const char* pFilename) {
 
 
     // Fonts
-
+    printf("Get Fonts\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     AssetManager::ReserveFonts(count);
@@ -990,7 +997,7 @@ bool GameLoad(const char* pFilename) {
     }
 
     // Timelines
-
+    printf("Get Timelines\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     unsigned int timelineCount = count;
@@ -1037,7 +1044,7 @@ bool GameLoad(const char* pFilename) {
 
 
     // Objects
-
+    printf("Get Objects\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     unsigned int objectCount = count;
@@ -1102,7 +1109,7 @@ bool GameLoad(const char* pFilename) {
 
 
     // Rooms
-
+    printf("Get Rooms\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     unsigned int roomCount = count;
@@ -1216,7 +1223,7 @@ bool GameLoad(const char* pFilename) {
     InstanceList::SetLastIDs(lastInstanceID, lastTileID);
 
     // Include files
-
+    printf("Get Included Files\n");
     pos += 4;
     count = ReadDword(buffer, &pos);
     AssetManager::ReserveIncludeFiles(count);
@@ -1258,7 +1265,7 @@ bool GameLoad(const char* pFilename) {
         file->removeAtGameEnd = ReadDword(data, &dataPos);
     }
 
-
+    printf("Getting Game information data (the thing that comes up when you press F1)\n");
     // Game information data (the thing that comes up when you press F1)
     pos += 4;
     if (!InflateBlock(buffer, &pos, &data, &dataLength, &outputSize)) {
@@ -1282,7 +1289,7 @@ bool GameLoad(const char* pFilename) {
     _info.freezeGame = ReadDword(data, &dataPos);
     _info.gameInfo = ReadString(data, &dataPos);
 
-
+    printf("Garbage\n");
     // Garbage?
     pos += 4;
     count = ReadDword(buffer, &pos);
@@ -1290,7 +1297,7 @@ bool GameLoad(const char* pFilename) {
         pos += ReadDword(buffer, &pos);
     }
 
-
+    printf("Get Room Order\n");
     // Room order
     pos += 4;
     _roomOrderCount = ReadDword(buffer, &pos);
@@ -1298,23 +1305,28 @@ bool GameLoad(const char* pFilename) {
     for (unsigned int i = 0; i < _roomOrderCount; i++) {
         _roomOrder[i] = ReadDword(buffer, &pos);
     }
+    printf("Set Room Order\n");
     CodeManager::SetRoomOrder(&_roomOrder, _roomOrderCount);
 
+    printf("Compile Event Lists\n");
     // Compile object parented event lists and identities
     AssetManager::CompileObjectIdentities();
 
+    printf("Compile Scripts\n");
     // Compile scripts
     for (unsigned int i = 0; i < scriptCount; i++) {
         Script* s = AssetManager::GetScript(i);
         if (s->exists) {
             if (!CodeManager::Compile(s->codeObj)) {
                 // Error compiling script
+                printf("Error compiling scripts\n");
                 free(data);
                 delete[] buffer;
                 return false;
             }
         }
     }
+    printf("Compile timelines\n");
     // Compile timelines
     for (unsigned int i = 0; i < timelineCount; i++) {
         Timeline* t = AssetManager::GetTimeline(i);
@@ -1331,6 +1343,7 @@ bool GameLoad(const char* pFilename) {
             }
         }
     }
+    printf("Compile object events\n");
     // Compile object events
     for (unsigned int i = 0; i < objectCount; i++) {
         Object* o = AssetManager::GetObject(i);
@@ -1340,6 +1353,7 @@ bool GameLoad(const char* pFilename) {
                     for (unsigned int k = 0; k < ev.second.actionCount; k++) {
                         if (!CodeActionManager::Compile(ev.second.actions[k])) {
                             // Error compiling script
+                            //printf("Error in \n"+CodeActionManager::Compile(ev.second.actions[k]));
                             free(data);
                             delete[] buffer;
                             return false;
@@ -1349,6 +1363,7 @@ bool GameLoad(const char* pFilename) {
             }
         }
     }
+    printf("Compile triggers\n");
     // Compile triggers
     for (unsigned int i = 0; i < triggerCount; i++) {
         Trigger* t = AssetManager::GetTrigger(i);
@@ -1361,6 +1376,7 @@ bool GameLoad(const char* pFilename) {
             }
         }
     }
+    printf("Compile Room creation code\n");
     // Compile room creation code (includes creation code of room-instances)
     for (unsigned int i = 0; i < roomCount; i++) {
         Room* r = AssetManager::GetRoom(i);
@@ -1382,7 +1398,7 @@ bool GameLoad(const char* pFilename) {
         }
     }
 
-
+    printf("Clean up\n");
     // Cleaning up
     free(data);
     delete[] buffer;
@@ -1391,18 +1407,21 @@ bool GameLoad(const char* pFilename) {
 }
 
 bool GameStart() {
+    printf("GameStart()\n");
     // Clear out the instances if there were any
     InstanceList::ClearAll();
 
     // Reset the room to its default value so that LoadRoom() won't ever fail when restarting
     _globals.room = 0xFFFFFFFF;
 
+    printf("Create game window\n");
     // Start up game window (this will safely destroy the old one if one existed)
     if (!RMakeGameWindow(&settings, AssetManager::GetRoom(_roomOrder[0])->width, AssetManager::GetRoom(_roomOrder[0])->height)) {
         // Failed to create GLFW window
+        printf("Failed to create window\n");
         return false;
     }
-
+    printf("Load first room\n");
     // Load first room
     return GameLoadRoom(_roomOrder[0]);
 }
