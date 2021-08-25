@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <cstddef>
 
 typedef unsigned int RImageIndex;
 typedef unsigned int CodeObject;
