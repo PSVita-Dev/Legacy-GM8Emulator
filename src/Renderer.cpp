@@ -4,16 +4,18 @@
 #include "InputHandler.hpp"
 
 // It's supposed to be in GLAD *then* GLFW, don't remove the newline inbetween.
-#include <glad/glad.h>
+//#include <glad/glad.h>
 
-#include <GLFW/glfw3.h>
+#include "callbacks.h"
+#include "glib2d.h"
+//#include <GLFW/glfw3.h>
 #include <finders_interface.h>  // rectpack2D
 
 #include <cmath>
 #include <cstring>
 #include <iostream>
 
-const GLchar* fragmentShaderCode =
+/*const GLchar* fragmentShaderCode =
     "#version 330\n"
     "uniform sampler2D tex;\n"
     "in float objAlpha;\n"
@@ -50,8 +52,8 @@ const GLchar* vertexShaderCode =
     "gl_Position = project * vec4(vert.x, vert.y, vert.z, 1);\n"
     "}";
 
-
-void mat4Mult(const GLfloat* lhs, const GLfloat* rhs, GLfloat* out) {
+*/
+void mat4Mult(const float* lhs, const float* rhs, float* out) {
     for (unsigned int y = 0; y < 4; y++) {
         for (unsigned int x = 0; x < 4; x++) {
             out[(y * 4) + x] = (lhs[y * 4] * rhs[x]) + (lhs[(y * 4) + 1] * rhs[x + 4]) + (lhs[(y * 4) + 2] * rhs[x + 8]) + (lhs[(y * 4) + 3] * rhs[x + 12]);
@@ -83,21 +85,21 @@ struct RAtlasImage {
 
 // Represents a command to draw a single image
 struct RDrawCommand {
-    GLfloat transform[16];
-    GLfloat alpha;
-    GLfloat blend[3];
-    GLfloat atlasXY[2];
-    GLfloat atlasWH[2];
+    float transform[16];
+    float alpha;
+    float blend[3];
+    float atlasXY[2];
+    float atlasWH[2];
 
     unsigned int atlasId;
     unsigned int imageIndex;
-    GLint atlasGlTex;
+    int atlasGlTex;
 };
 std::vector<RDrawCommand> _drawCommands;
 
 // Atlas structure, can exist without being used
 struct RAtlas {
-    GLuint glTex;
+    int glTex;
     unsigned int w;
     unsigned int h;
 };
@@ -126,9 +128,9 @@ unsigned int _windowH;
 unsigned int _maxTextures;
 unsigned int _maxTextureSize;
 
-GLuint _glProgram;
-GLuint _vao;
-GLuint _vbo;
+//GLuint _glProgram;
+//GLuint _vao;
+//GLuint _vbo;
 
 
 void RInit() {
@@ -141,18 +143,19 @@ void RInit() {
 }
 
 void RTerminate() {
-    for (const RPreImage& n : _preImages) {
-        free(n.data);
-    }
-    glfwDestroyWindow(_window);  // This function is allowed be called on NULL
-    glfwTerminate();
+    //for (const RPreImage& n : _preImages) {
+    //    free(n.data);
+    //}
+   // glfwDestroyWindow(_window);  // This function is allowed be called on NULL
+  //  glfwTerminate();
 }
 
 bool RMakeGameWindow(GameSettings* settings, unsigned int w, unsigned int h) {
     // Fail if we already did this
     if (_contextSet) return false;
-    
-    glfwSetErrorCallback([] (int code, const char *desc) -> void {
+    //callbacks_setup();
+    g2dInit();
+    /*glfwSetErrorCallback([] (int code, const char *desc) -> void {
         std::cout << "GLFW Error " << code << ": " << desc << std::endl;
     });
 
@@ -263,35 +266,35 @@ bool RMakeGameWindow(GameSettings* settings, unsigned int w, unsigned int h) {
         }
         std::cout << "glGetError returned " << error << std::endl;
         return false;
-    }
+    }*/
     return true;
 }
 
 void RResizeGameWindow(unsigned int w, unsigned int h) {
     // Only do this if the w and h settings aren't equal to what size the window was last set to - even if the user has resized it since then.
-    if (w != _windowW || h != _windowH) {
+    /*if (w != _windowW || h != _windowH) {
         glfwSetWindowSize(_window, w, h);
         _windowW = w;
         _windowH = h;
-    }
+    }*/
 }
 
-void RSetGameWindowTitle(const char* title) { glfwSetWindowTitle(_window, title); }
+//void RSetGameWindowTitle(const char* title) { glfwSetWindowTitle(_window, title); }
 
 void RGetCursorPos(int* xpos, int* ypos) {
     double xp, yp;
     int actualWinW, actualWinH;
-    glfwGetCursorPos(_window, &xp, &yp);
+    /*glfwGetCursorPos(_window, &xp, &yp);
     glfwGetWindowSize(_window, &actualWinW, &actualWinH);
     xp /= actualWinW;
     yp /= actualWinH;
     xp *= _windowW;
     yp *= _windowH;
     if (xpos) (*xpos) = ( int )xp;
-    if (ypos) (*ypos) = ( int )yp;
+    if (ypos) (*ypos) = ( int )yp;*/
 }
 
-bool RShouldClose() { return glfwWindowShouldClose(_window); }
+//bool RShouldClose() { return glfwWindowShouldClose(_window); }
 
 void RSetBGColour(unsigned int col) { _roomBGColour = col; }
 
@@ -345,22 +348,22 @@ void RDrawPartialImage(RImageIndex ix, double x, double y, double xscale, double
 
     // Calculate a single matrix for scaling and transforming the sprite
     double dRot = rot * PI / 180;
-    GLfloat sinRot = ( GLfloat )sin(dRot);
-    GLfloat cosRot = ( GLfloat )cos(dRot);
-    GLfloat dx = (( GLfloat )aImg->originX / aImg->w);
-    GLfloat dy = (( GLfloat )aImg->originY / aImg->h);
+    float sinRot = ( float )sin(dRot);
+    float cosRot = ( float )cos(dRot);
+    float dx = (( float )aImg->originX / aImg->w);
+    float dy = (( float )aImg->originY / aImg->h);
 
     // TODO: We can optimize this a lot by pre-calculating the final matrix instead of multiplying a ton of hard-coded values for every draw.
     //       But that should wait until we've implemented views, as that will affect the result.
-    GLfloat toMiddle[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -dx, -dy, 0, 1};
-    GLfloat scale[16] = {(GLfloat)(partW * xscale), 0, 0, 0, 0, (GLfloat)(partH * -yscale), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-    GLfloat rotate[16] = {cosRot, sinRot, 0, 0, -sinRot, cosRot, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-    GLfloat scale2[16] = {2.0f / _windowW, 0, 0, 0, 0, 2.0f / _windowH, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-    GLfloat transform[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, (GLfloat)(x * 2.0f / _windowW) - 1, -(GLfloat)((y * 2.0f / _windowH) - 1), 0, 1};
+    float toMiddle[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -dx, -dy, 0, 1};
+    float scale[16] = {(float)(partW * xscale), 0, 0, 0, 0, (float)(partH * -yscale), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    float rotate[16] = {cosRot, sinRot, 0, 0, -sinRot, cosRot, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    float scale2[16] = {2.0f / _windowW, 0, 0, 0, 0, 2.0f / _windowH, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    float transform[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, (float)(x * 2.0f / _windowW) - 1, -(float)((y * 2.0f / _windowH) - 1), 0, 1};
 
 
-    GLfloat tmp[16];
-    GLfloat project[16];
+    float tmp[16];
+    float project[16];
 
     mat4Mult(toMiddle, scale, tmp);
     mat4Mult(tmp, rotate, project);
@@ -370,15 +373,15 @@ void RDrawPartialImage(RImageIndex ix, double x, double y, double xscale, double
     RAtlas* atlas = &_atlases[aImg->atlasId];
 
     // Create draw command
-    memcpy(command.transform, project, 16 * sizeof(GLfloat));
-    command.alpha = ( GLfloat )alpha;
-    command.blend[0] = (GLfloat)(blend & 0xFF) / 0xFF;
-    command.blend[1] = (GLfloat)(blend & 0xFF00) / 0xFF00;
-    command.blend[2] = (GLfloat)(blend & 0xFF0000) / 0xFF0000;
-    command.atlasXY[0] = (GLfloat)(( double )(aImg->x + partX) / ( double )atlas->w);
-    command.atlasXY[1] = (GLfloat)(( double )(aImg->y + partY) / ( double )atlas->h);
-    command.atlasWH[0] = (GLfloat)(( double )(partW) / ( double )atlas->w);
-    command.atlasWH[1] = (GLfloat)(( double )(partH) / ( double )atlas->h);
+    memcpy(command.transform, project, 16 * sizeof(float));
+    command.alpha = ( float )alpha;
+    command.blend[0] = (float)(blend & 0xFF) / 0xFF;
+    command.blend[1] = (float)(blend & 0xFF00) / 0xFF00;
+    command.blend[2] = (float)(blend & 0xFF0000) / 0xFF0000;
+    command.atlasXY[0] = (float)(( double )(aImg->x + partX) / ( double )atlas->w);
+    command.atlasXY[1] = (float)(( double )(aImg->y + partY) / ( double )atlas->h);
+    command.atlasWH[0] = (float)(( double )(partW) / ( double )atlas->w);
+    command.atlasWH[1] = (float)(( double )(partH) / ( double )atlas->h);
     command.imageIndex = ix;
     command.atlasId = aImg->atlasId;
     command.atlasGlTex = atlas->glTex;
@@ -388,31 +391,37 @@ void RDrawPartialImage(RImageIndex ix, double x, double y, double xscale, double
 
 void RStartFrame() {
     int actualWinW, actualWinH;
-    glfwGetWindowSize(_window, &actualWinW, &actualWinH);
+    g2dClear(_colourOutsideRoom & 0xFF);
+
+    g2dSetScissor(0, 0, actualWinW, actualWinH);
+    g2dClear(_roomBGColour & 0xFF);
+    g2dSetScissor(0, 0, actualWinW, actualWinH);
+    /*glfwGetWindowSize(_window, &actualWinW, &actualWinH);
     glClearColor((GLclampf)(_colourOutsideRoom & 0xFF) / 0xFF, (GLclampf)((_colourOutsideRoom >> 8) & 0xFF) / 0xFF, (GLclampf)((_colourOutsideRoom >> 16) & 0xFF) / 0xFF, ( GLclampf )1.0);
     glViewport(0, 0, actualWinW, actualWinH);
     glScissor(0, 0, actualWinW, actualWinH);
+
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Later, we'll use this for clearing the background of each active view's viewport. But views aren't supported right now.
     glClearColor((GLclampf)(_roomBGColour & 0xFF) / 0xFF, (GLclampf)((_roomBGColour >> 8) & 0xFF) / 0xFF, (GLclampf)((_roomBGColour >> 16) & 0xFF) / 0xFF, ( GLclampf )1.0);
     glViewport(0, 0, actualWinW, actualWinH);
     glScissor(0, 0, actualWinW, actualWinH);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);*/
 
-    _drawCommands.clear();
+   _drawCommands.clear();
 }
 
 void RRenderFrame() {
     int actualWinW, actualWinH;
-    glfwGetWindowSize(_window, &actualWinW, &actualWinH);
+   /* glfwGetWindowSize(_window, &actualWinW, &actualWinH);
 
     // Buffer all draw commands into VBO
     GLuint commandsVBO;
     glGenBuffers(1, &commandsVBO);
     glBindBuffer(GL_ARRAY_BUFFER, commandsVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(RDrawCommand) * _drawCommands.size(), _drawCommands.data(), GL_STATIC_DRAW);
-
+*/
     unsigned int drawn = 0;
     while (drawn < _drawCommands.size()) {
         // Calculate how many commands to process in this instanced draw
@@ -426,15 +435,15 @@ void RRenderFrame() {
 
         // Activate atlas texture
         if (boundAtlas != _drawCommands[drawn].atlasId) {
-            glActiveTexture(GL_TEXTURE0 + _drawCommands[drawn].atlasId);
-            glBindTexture(GL_TEXTURE_2D, _drawCommands[drawn].atlasGlTex);
+          //  glActiveTexture(GL_TEXTURE0 + _drawCommands[drawn].atlasId);
+           // glBindTexture(GL_TEXTURE_2D, _drawCommands[drawn].atlasGlTex);
             boundAtlas = _drawCommands[drawn].atlasId;
         }
 
         // Bind instanced inputs
-        glUniform1i(glGetUniformLocation(_glProgram, "tex"), _drawCommands[drawn].atlasId);
+       // glUniform1i(glGetUniformLocation(_glProgram, "tex"), _drawCommands[drawn].atlasId);
 
-        GLint shaderAlpha = glGetAttribLocation(_glProgram, "vObjAlpha");
+       /* GLint shaderAlpha = glGetAttribLocation(_glProgram, "vObjAlpha");
         GLint shaderBlend = glGetAttribLocation(_glProgram, "vObjBlend");
         GLint shaderXY = glGetAttribLocation(_glProgram, "vAtlasXY");
         GLint shaderWH = glGetAttribLocation(_glProgram, "vAtlasWH");
@@ -474,14 +483,14 @@ void RRenderFrame() {
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glEnableVertexAttribArray(glGetAttribLocation(_glProgram, "vertTexCoord"));
         glVertexAttribPointer(glGetAttribLocation(_glProgram, "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 3 * sizeof(GLfloat), 0);
-        glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, toDraw);
+        glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, toDraw);*/
 
         drawn += toDraw;
     }
 
-    glDeleteBuffers(1, &commandsVBO);
-    glViewport(0, 0, actualWinW, actualWinH);
-    glfwSwapBuffers(_window);
+  //  glDeleteBuffers(1, &commandsVBO);
+   // glViewport(0, 0, actualWinW, actualWinH);
+ //   glfwSwapBuffers(_window);
 }
 
 
@@ -541,18 +550,24 @@ bool _Compile(unsigned int firstAtlas) {
         }
     }
 
+
     // Upload atlas to GPU
-    glGenTextures(1, &_atlases[firstAtlas].glTex);
+   // glGenTextures(1, &_atlases[firstAtlas].glTex);
+
     _atlases[firstAtlas].w = result_size.w;
     _atlases[firstAtlas].h = result_size.h;
-    glActiveTexture(GL_TEXTURE0 + firstAtlas);
+
+    //g2dTexture* bg = g2dTexLoad(static_cast<void*>(pixelData),G2D_SWIZZLE);
+
+   // g2dBeginRects(bg);
+    /*glActiveTexture(GL_TEXTURE0 + firstAtlas);
     glBindTexture(GL_TEXTURE_2D, _atlases[firstAtlas].glTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, result_size.w, result_size.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<void*>(pixelData));
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);*/
 
     free(pixelData);
 
