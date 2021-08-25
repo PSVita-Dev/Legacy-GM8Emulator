@@ -44,7 +44,7 @@ bool GameLoadRoom(int id) {
 
     // Update renderer
     RResizeGameWindow(room->width, room->height);
-    RSetGameWindowTitle(room->caption);
+  //  RSetGameWindowTitle(room->caption);
     RSetBGColour(room->backgroundColour);
 
     // Update views
@@ -519,8 +519,8 @@ bool GameFrame() {
     RRenderFrame();
 
     // Update Caption
-    RSetGameWindowTitle(_globals.room_caption.c_str());
-    if (RShouldClose()) return false;
+   // RSetGameWindowTitle(_globals.room_caption.c_str());
+    //if (RShouldClose()) return false;
 
     // Update sprite info
     iter = InstanceList::Iterator();
