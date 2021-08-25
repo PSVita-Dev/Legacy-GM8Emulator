@@ -3,7 +3,7 @@ An emulator for games created with GameMaker 8. This repo is no longer being dev
 
 ## Building For PSP
 - Clone the repository, make sure to grab submodules along with it (`--recurse-submodules` or `submodule update --init --recursive`)
-- cmake command : psp-cmake -S . -B build/ then cmake --build build/
+- cmake command : `psp-cmake -S . -B build/` then `cmake --build build/`
 
 ## Contact
 gm8emulator@gmail.com
