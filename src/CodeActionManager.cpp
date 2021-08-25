@@ -188,7 +188,7 @@ bool CodeActionManager::Read(const unsigned char* stream, unsigned int* pos, Cod
                 gml = "speed+=argument[1];direction=";
             else
                 gml = "speed=argument[1];direction=";
-            gml += std::to_string(direction);
+          //  gml += std::to_string(direction);
             break;
         }
         case 102:
