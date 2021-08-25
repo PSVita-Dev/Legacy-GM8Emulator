@@ -1,5 +1,5 @@
 #include "InputHandler.hpp"
-#include <GLFW/glfw3.h>
+//#include <GLFW/glfw3.h>
 #include <cstring>
 
 // As far as I know, the GM8 keycodes go up to 124 (vk_f12)
@@ -14,7 +14,7 @@ GLFWwindow* win;
 // Callback for when a key action gets sent to the window
 // todo: this wrongly assumes numlock is on, this was fixed in a later glfw build
 void key_callback(GLFWwindow* window, int k, int scancode, int action, int mods) {
-    if (k != GLFW_KEY_UNKNOWN) {
+   /* if (k != GLFW_KEY_UNKNOWN) {
 
         // map GLFW key to GM8 keycode
         unsigned int key;
@@ -131,21 +131,21 @@ void key_callback(GLFWwindow* window, int k, int scancode, int action, int mods)
         else if (!_current[key])
             _pressed[key] = true;
         _current[key] = (action != GLFW_RELEASE);
-    }
+    }*/
 }
 
 void InputInit(GLFWwindow* window) {
     memset(_current, 0, sizeof(bool) * NUM_KEYS);
     memset(_pressed, 0, sizeof(bool) * NUM_KEYS);
     memset(_released, 0, sizeof(bool) * NUM_KEYS);
-    glfwSetKeyCallback(window, key_callback);
+    //glfwSetKeyCallback(window, key_callback);
     win = window;
 }
 
 void InputUpdate() {
     memset(_pressed, 0, sizeof(bool) * NUM_KEYS);
     memset(_released, 0, sizeof(bool) * NUM_KEYS);
-    glfwPollEvents();
+   // glfwPollEvents();
 }
 
 
@@ -158,7 +158,7 @@ bool InputCheckKeyDirect(int code) {
     // if (code < 0 || code > NUM_KEYS) return false;
     // return glfwGetKey(win, code);
     int c = 0;
-    switch (code) {
+   /* switch (code) {
         case 37:
             c = GLFW_KEY_LEFT;
             break;
@@ -174,7 +174,7 @@ bool InputCheckKeyDirect(int code) {
         default:
             return false;
     }
-    return glfwGetKey(win, c);
+    return glfwGetKey(win, c);*/
 }
 
 bool InputCheckKeyPressed(int code) {
