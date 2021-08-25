@@ -1,5 +1,7 @@
 #include "Assets.hpp"
 #include "CodeActionManager.hpp"
+#include <cstddef>
+#include <cstdlib>
 
 Extension::Extension() {
     name = nullptr;
