@@ -720,7 +720,7 @@ bool Runtime::irandom_range(unsigned int argc, GMLType* argv, GMLType* out) {
     int rand = RNG::Irandom(::abs(_round(argv[1].dVal) - _round(argv[0].dVal)));
     if (out) {
         out->state = GMLTypeState::Double;
-        out->dVal = static_cast<double>(rand) + std::fmin(argv[0].dVal, argv[1].dVal);
+        out->dVal = static_cast<double>(rand) + std::min(argv[0].dVal, argv[1].dVal);
     }
     return true;
 }
@@ -1480,7 +1480,7 @@ bool Runtime::tan(unsigned int argc, GMLType* argv, GMLType* out) {
 
 bool Runtime::window_set_caption(unsigned int argc, GMLType* argv, GMLType* out) {
     if (!_assertArgs(argc, argv, 1, true, GMLTypeState::String)) return false;
-    RSetGameWindowTitle(argv->sVal.c_str());
+ //   RSetGameWindowTitle(argv->sVal.c_str());
     return true;
 }
 
