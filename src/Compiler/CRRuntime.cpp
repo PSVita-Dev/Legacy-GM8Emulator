@@ -42,7 +42,7 @@ void Runtime::SetReturnCause(Runtime::ReturnCause c) { _cause = c; }
 bool Runtime::_assertArgs(unsigned int& argc, GMLType* argv, unsigned int arge, bool lenient, ...) {
     if (argc != arge) {
         _cause = ReturnCause::ExitError;
-        _error = "Failed to verify args: wrong number: expected " + std::to_string(arge) + ", got " + std::to_string(argc);
+        //_error = "Failed to verify args: wrong number: expected " + std::to_string(arge) + ", got " + std::to_string(argc);
         return false;
     }
 
@@ -58,7 +58,7 @@ bool Runtime::_assertArgs(unsigned int& argc, GMLType* argv, unsigned int arge, 
             }
             else {
                 _cause = ReturnCause::ExitError;
-                _error = "Failed to verify args: wrong type in position " + std::to_string(i) + ": expected ";
+                //_error = "Failed to verify args: wrong type in position " + std::to_string(i) + ": expected ";
                 _error += (state == GMLTypeState::String ? "string" : "real");
                 _error += ", got ";
                 _error += (argv[i].state == GMLTypeState::String ? "string" : "real");
@@ -75,7 +75,7 @@ bool CRExpressionValue::Evaluate(GMLType* output) {
     for (CRUnaryOperator op : _unary) {
         if (output->state == GMLTypeState::String) {
             _cause = Runtime::ReturnCause::ExitError;
-            _error = "Tried to apply unary operator " + std::to_string(op) + " to string \"" + output->sVal + "\"";
+            //_error = "Tried to apply unary operator " + std::to_string(op) + " to string \"" + output->sVal + "\"";
             return false;
         }
         switch (op) {
@@ -92,7 +92,7 @@ bool CRExpressionValue::Evaluate(GMLType* output) {
                 break;
             default:
                 _cause = Runtime::ReturnCause::ExitError;
-                _error = "Unrecognized unary operator " + std::to_string(op);
+                //_error = "Unrecognized unary operator " + std::to_string(op);
                 return false;
         }
     }
@@ -111,8 +111,8 @@ bool _applySetMethod(GMLType* lhs, CRSetMethod method, const GMLType* const rhs)
         if (lhs->state != rhs->state) {
             _cause = Runtime::ReturnCause::ExitError;
             _error = "Incompatible operands for +, lhs: ";
-            _error += (lhs->state == GMLTypeState::Double) ? std::to_string(lhs->dVal) : ("\"" + lhs->sVal + "\"");
-            _error += ", rhs: " + (rhs->state == GMLTypeState::Double) ? std::to_string(rhs->dVal) : ("\"" + rhs->sVal + "\"");
+            //_error += (lhs->state == GMLTypeState::Double) ? std::to_string(lhs->dVal) : ("\"" + lhs->sVal + "\"");
+            //_error += ", rhs: " + (rhs->state == GMLTypeState::Double) ? std::to_string(rhs->dVal) : ("\"" + rhs->sVal + "\"");
             return false;
         }
         if (lhs->state == GMLTypeState::String) {
@@ -127,9 +127,9 @@ bool _applySetMethod(GMLType* lhs, CRSetMethod method, const GMLType* const rhs)
         // No other set methods can be used with strings, so we can error if either one is a string
         if ((lhs->state == GMLTypeState::String) || (rhs->state == GMLTypeState::String)) {
             _cause = Runtime::ReturnCause::ExitError;
-            _error = "Incompatible operands for method " + std::to_string(method) + ", lhs: ";
-            _error += (lhs->state == GMLTypeState::Double) ? std::to_string(lhs->dVal) : ("\"" + lhs->sVal + "\"");
-            _error += ", rhs: " + (rhs->state == GMLTypeState::Double) ? std::to_string(rhs->dVal) : ("\"" + rhs->sVal + "\"");
+            //_error = "Incompatible operands for method " + std::to_string(method) + ", lhs: ";
+           // _error += (lhs->state == GMLTypeState::Double) ? std::to_string(lhs->dVal) : ("\"" + lhs->sVal + "\"");
+          //  _error += ", rhs: " + (rhs->state == GMLTypeState::Double) ? std::to_string(rhs->dVal) : ("\"" + rhs->sVal + "\"");
             return false;
         }
         switch (method) {
@@ -330,7 +330,7 @@ bool _getGameValue(CRGameVar index, unsigned int arrayIndex, GMLType* out) {
             break;
         default:
             _cause = Runtime::ReturnCause::ExitError;
-            _error = "Read unrecognized Game Var " + std::to_string(index);
+           // _error = "Read unrecognized Game Var " + std::to_string(index);
             return false;
     }
     return true;
@@ -439,7 +439,7 @@ bool _setGameValue(CRGameVar index, unsigned int arrayIndex, CRSetMethod method,
             break;
         default:
             _cause = Runtime::ReturnCause::ExitError;
-            _error = "Tried to write unrecognized or read-only Game Var " + std::to_string(index);
+            //_error = "Tried to write unrecognized or read-only Game Var " + std::to_string(index);
             return false;
     }
     return true;
@@ -646,7 +646,7 @@ bool _setInstanceVar(Instance& instance, CRInstanceVar index, unsigned int array
             break;
         default:
             _cause = Runtime::ReturnCause::ExitError;
-            _error = "Tried to write unrecognized or read-only instance var " + std::to_string(index);
+         //   _error = "Tried to write unrecognized or read-only instance var " + std::to_string(index);
             return false;
     }
     return true;
@@ -820,7 +820,7 @@ bool _getInstanceVar(Instance& instance, CRInstanceVar index, unsigned int array
             break;
         default:
             _cause = Runtime::ReturnCause::ExitError;
-            _error = "Read unrecognized instance variable " + std::to_string(index);
+           // _error = "Read unrecognized instance variable " + std::to_string(index);
             return false;
     }
     return true;
@@ -930,8 +930,8 @@ bool CRExpression::Evaluate(GMLType* output) {
                 if (var.state == GMLTypeState::String || rhs.state == GMLTypeState::String) {
                     _cause = Runtime::ReturnCause::ExitError;
                     _error = "Incompatible operands for operator mod: ";
-                    _error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
-                    _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
+                    //_error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
+                  //  _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
                     return false;
                 }
                 var.dVal = std::fmod(var.dVal, rhs.dVal);
@@ -941,8 +941,8 @@ bool CRExpression::Evaluate(GMLType* output) {
                 if (var.state == GMLTypeState::String || rhs.state == GMLTypeState::String) {
                     _cause = Runtime::ReturnCause::ExitError;
                     _error = "Incompatible operands for operator div: ";
-                    _error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
-                    _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
+                  //  _error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
+                  //  _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
                     return false;
                 }
                 var.dVal = ::floor(var.dVal / rhs.dVal);
@@ -1032,8 +1032,8 @@ bool CRExpression::Evaluate(GMLType* output) {
                 if (var.state == GMLTypeState::String || rhs.state == GMLTypeState::String) {
                     _cause = Runtime::ReturnCause::ExitError;
                     _error = "Incompatible operands for operator <<: ";
-                    _error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
-                    _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
+                   // _error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
+                   // _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
                     return false;
                 }
                 var.dVal = ( double )(Runtime::_round(var.dVal) << Runtime::_round(rhs.dVal));
@@ -1043,8 +1043,8 @@ bool CRExpression::Evaluate(GMLType* output) {
                 if (var.state == GMLTypeState::String || rhs.state == GMLTypeState::String) {
                     _cause = Runtime::ReturnCause::ExitError;
                     _error = "Incompatible operands for operator >>: ";
-                    _error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
-                    _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
+                 //   _error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
+                 //   _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
                     return false;
                 }
                 var.dVal = ( double )(Runtime::_round(var.dVal) >> Runtime::_round(rhs.dVal));
@@ -1052,9 +1052,9 @@ bool CRExpression::Evaluate(GMLType* output) {
             }
             default:
                 _cause = Runtime::ReturnCause::ExitError;
-                _error = "Unrecognized operator: " + std::to_string((*i)->GetOperator());
-                _error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
-                _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
+               // _error = "Unrecognized operator: " + std::to_string((*i)->GetOperator());
+               // _error += (var.state == GMLTypeState::Double) ? std::to_string(var.dVal) : ("\"" + var.sVal + "\"");
+             //   _error += ", rhs: " + (rhs.state == GMLTypeState::Double) ? std::to_string(rhs.dVal) : ("\"" + rhs.sVal + "\"");
                 return false;
         }
         i++;
@@ -1074,7 +1074,7 @@ bool _evalArrayAccessor(std::vector<CRExpression>& dimensions, int* out) {
     if (dimensions.size()) {
         if (dimensions.size() > 2) {
             _cause = Runtime::ReturnCause::ExitError;
-            _error = "Tried to access " + std::to_string(dimensions.size()) + "-dimensional array; 2-dimensional is the highest supported";
+           // _error = "Tried to access " + std::to_string(dimensions.size()) + "-dimensional array; 2-dimensional is the highest supported";
             return false;
         }
         GMLType dim1;
@@ -1087,7 +1087,7 @@ bool _evalArrayAccessor(std::vector<CRExpression>& dimensions, int* out) {
         (*out) = Runtime::_round(dim1.dVal);
         if ((*out) < 0 || (*out) >= 32000) {
             _cause = Runtime::ReturnCause::ExitError;
-            _error = "Invalid array accessor: \"" + std::to_string(dim1.dVal) + "\"";
+            //_error = "Invalid array accessor: \"" + std::to_string(dim1.dVal) + "\"";
             return false;
         }
 
@@ -1102,7 +1102,7 @@ bool _evalArrayAccessor(std::vector<CRExpression>& dimensions, int* out) {
             int id2 = Runtime::_round(dim2.dVal);
             if (id2 < 0 || id2 >= 32000) {
                 _cause = Runtime::ReturnCause::ExitError;
-                _error = "Invalid array accessor: \"" + std::to_string(dim1.dVal) + "\"";
+                //_error = "Invalid array accessor: \"" + std::to_string(dim1.dVal) + "\"";
                 return false;
             }
             (*out) = ((*out) * 32000) + id2;
@@ -1148,7 +1148,7 @@ bool CRActionAssignmentField::Run() {
             default: {
                 if (id < 0) {
                     _cause = Runtime::ReturnCause::ExitError;
-                    _error = "Tried to dereference negative number: " + std::to_string(id);
+                   // _error = "Tried to dereference negative number: " + std::to_string(id);
                     return false;
                 }
                 InstanceList::Iterator iter(static_cast<unsigned int>(id));
@@ -1212,7 +1212,7 @@ bool CRActionAssignmentArray::Run() {
             default: {
                 if (id < 0) {
                     _cause = Runtime::ReturnCause::ExitError;
-                    _error = "Tried to dereference negative number: " + std::to_string(id);
+                //    _error = "Tried to dereference negative number: " + std::to_string(id);
                     return false;
                 }
                 InstanceList::Iterator iter(static_cast<unsigned int>(id));
@@ -1276,7 +1276,7 @@ bool CRActionAssignmentInstanceVar::Run() {
             default: {
                 if (id < 0) {
                     _cause = Runtime::ReturnCause::ExitError;
-                    _error = "Tried to dereference negative number: " + std::to_string(id);
+         //           _error = "Tried to dereference negative number: " + std::to_string(id);
                     return false;
                 }
                 InstanceList::Iterator iter(static_cast<unsigned int>(id));
@@ -1310,7 +1310,7 @@ bool CRActionRunFunction::Run() {
     unsigned int argc = static_cast<unsigned int>(_args.size());
     if (argc > 16) {
         _cause = Runtime::ReturnCause::ExitError;
-        _error = "Too many args to internal function, argc: " + std::to_string(argc) + ", function ID: " + std::to_string(_function);
+       // _error = "Too many args to internal function, argc: " + std::to_string(argc) + ", function ID: " + std::to_string(_function);
         return false;
     }
     for (unsigned int i = 0; i < argc; i++) {
@@ -1325,7 +1325,7 @@ bool CRActionRunScript::Run() {
     unsigned int argc = static_cast<unsigned int>(_args.size());
     if (argc > 16) {
         _cause = Runtime::ReturnCause::ExitError;
-        _error = "Too many args to internal function, argc: " + std::to_string(argc) + ", function ID: " + std::to_string(_scriptID);
+      //  _error = "Too many args to internal function, argc: " + std::to_string(argc) + ", function ID: " + std::to_string(_scriptID);
         return false;
     }
     for (unsigned int i = 0; i < argc; i++) {
@@ -1402,7 +1402,7 @@ bool CRActionWith::Run() {
         default: {
             if (objID < 0) {
                 _cause = Runtime::ReturnCause::ExitError;
-                _error = "Tried to pass negative number to 'with': " + std::to_string(objID);
+            //    _error = "Tried to pass negative number to 'with': " + std::to_string(objID);
                 return false;
             }
             Runtime::Context c = _context;
@@ -1615,7 +1615,7 @@ bool CRExpField::_evaluate(GMLType* output) {
             default: {
                 if (id < 0) {
                     _cause = Runtime::ReturnCause::ExitError;
-                    _error = "Tried to dereference negative number: " + std::to_string(id);
+                 //   _error = "Tried to dereference negative number: " + std::to_string(id);
                     return false;
                 }
                 InstanceHandle i = InstanceList::Iterator(static_cast<unsigned int>(id)).Next();
@@ -1687,7 +1687,7 @@ bool CRExpArray::_evaluate(GMLType* output) {
             default: {
                 if (id < 0) {
                     _cause = Runtime::ReturnCause::ExitError;
-                    _error = "Tried to dereference negative number: " + std::to_string(id);
+                 //   _error = "Tried to dereference negative number: " + std::to_string(id);
                     return false;
                 }
                 InstanceHandle i = InstanceList::Iterator(static_cast<unsigned int>(id)).Next();
@@ -1753,7 +1753,7 @@ bool CRExpInstanceVar::_evaluate(GMLType* output) {
             default: {
                 if (id < 0) {
                     _cause = Runtime::ReturnCause::ExitError;
-                    _error = "Tried to dereference negative number: " + std::to_string(id);
+             //       _error = "Tried to dereference negative number: " + std::to_string(id);
                     return false;
                 }
                 InstanceHandle i = InstanceList::Iterator(static_cast<unsigned int>(id)).Next();
