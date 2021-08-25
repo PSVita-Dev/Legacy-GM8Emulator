@@ -3,6 +3,12 @@
 #include <iostream>
 #include <thread>
 
+#include <pspkernel.h>
+#include <pspdebug.h>
+#include <pspctrl.h>
+
+#include "glib2d.h"
+
 #define CHECK_MEMORY_LEAKS 0
 constexpr bool OUTPUT_FRAME_TIME = true;
 
@@ -12,6 +18,7 @@ constexpr bool OUTPUT_FRAME_TIME = true;
 #include <stdlib.h>
 #endif
 
+PSP_MODULE_INFO("GameMaker8 PSP", 0, 1, 0);
 int main(int argc, char** argv) {
 
 #if CHECK_MEMORY_LEAKS
@@ -22,17 +29,20 @@ int main(int argc, char** argv) {
     std::chrono::high_resolution_clock::time_point t1, t2, t3;
     std::chrono::duration<double> time_span;
     double se;
-
+    printf("***********************************\n");
+    printf("*     GameMaker 8 PSP Runner      *\n");
+    printf("***********************************\n");
     if constexpr (OUTPUT_FRAME_TIME) {
         t1 = std::chrono::high_resolution_clock::now();
     }
 
     GameInit();
-
+    printf("GameInit()\n");
     // This is just temp - you must place a game called "game.exe" in the project directory (or in the same directory as your built exe) to load it.
     // This can easily be changed to load from anywhere when the project is done.
     if (!GameLoad("game.exe")) {
         // Load failed
+        printf("Load Failed\n");
         GameTerminate();
         return 2;
     }
@@ -90,9 +100,11 @@ int main(int argc, char** argv) {
                 break;
             }
         }
+        g2dFlip(G2D_VSYNC);
     }
 
     // Natural end of application
     GameTerminate();
     return 0;
 }
+
