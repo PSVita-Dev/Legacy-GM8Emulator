@@ -197,8 +197,8 @@ void GM8Emulator::Compiler::TokenList::ParseGML(const char* gml, const size_t& l
 
             std::string hex_str(std::string_view(hexl_start, hexs_len));
             try {
-                unsigned long long result = std::stoull(hex_str, nullptr, 16);
-                tokens.push_back(Token(static_cast<double>(result)));
+               // unsigned long long result = std::stoull(hex_str, nullptr, 16);
+               // tokens.push_back(Token(static_cast<double>(result)));
             }
             catch (...) {
                 tokens.push_back(Token(static_cast<double>(0xFFFFFFFFFFFFFFFF)));
