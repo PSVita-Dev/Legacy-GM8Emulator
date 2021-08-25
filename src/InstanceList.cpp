@@ -7,6 +7,7 @@
 #include "Tile.hpp"
 #include <algorithm>  // for remove_if
 #include <vector>
+#include <cstdint>
 
 
 // Abstract type that InstanceList can pool and draw. Must be drawable
