@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
                 break;
             }
         }
-        g2dFlip(G2D_VSYNC);
+       // g2dFlip(G2D_VSYNC);
     }
 
     // Natural end of application

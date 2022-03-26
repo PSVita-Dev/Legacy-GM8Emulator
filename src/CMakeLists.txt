@@ -30,6 +30,9 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC z
   PUBLIC c
   PUBLIC pspgu
+  PUBLIC GL
+  PUBLIC glut
+  PUBLIC GLU
   PUBLIC ${PSP_LIBRARIES})
 
 create_pbp_file(TARGET ${PROJECT_NAME} TITLE "${CMAKE_PROJECT_NAME}"
