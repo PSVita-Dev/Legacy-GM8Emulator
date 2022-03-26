@@ -8,6 +8,7 @@
 #include "Instance.hpp"
 #include "Renderer.hpp"
 #include <cmath>
+#include <climits>
 
 bool GameLoadRoom(int id) {
     // Check room index is valid
@@ -136,7 +137,7 @@ bool GameFrame() {
     InstanceList::Iterator iter;
 
     // Update inputs from keyboard and mouse (doesn't really matter where this is in the event order as far as I know)
-    InputUpdate();
+    //InputUpdate();
 
     // Set all xprevious and yprevious
     while ((instance = iter.Next()) != InstanceList::NoInstance) {
@@ -433,13 +434,14 @@ bool GameFrame() {
                 for (int startY = (bg.tileVert ? (bg.y - stretchedH) : 0); startY < ( int )room->height; startY += stretchedH) {
                     for (int startX = (bg.tileHor ? (bg.x - stretchedW) : 0); startX < ( int )room->width; startX += stretchedW) {
                         RDrawImage(b->image, startX, startY, scaleX, scaleY, 0, 0xFFFFFFFF, 1);
+                        printf("back\n");
                     }
                 }
             }
         }
     }
 
-    /*
+    
     // Draw all tiles
     for (unsigned int i = 0; i < room->tileCount; i++) {
         RoomTile tile = room->tiles[i];
@@ -452,6 +454,7 @@ bool GameFrame() {
     while ((instance = iter.Next()) != InstanceList::NoInstance) {
         Instance& inst = InstanceList::GetInstance(instance);
         if (inst.depth > nextDepth && inst.exists && inst.visible) nextDepth = inst.depth;
+        printf("draw depth\n");
     }
 
     while (true) {
@@ -469,29 +472,36 @@ bool GameFrame() {
                         // This object has a custom draw event.
                         if (!CodeActionManager::RunInstanceEvent(8, 0, instance, InstanceList::NoInstance, inst.object_index)) return false;
                         if (_globals.changeRoom) return GameLoadRoom(_globals.roomTarget);
+                        printf("dr\n");
                     }
                     else {
                         // This is the default draw action if no draw event is present for this object.
                         if (inst.sprite_index >= 0) {
                             Sprite* sprite = AssetManager::GetSprite(inst.sprite_index);
+                            printf("sprite get\n");
                             if (sprite->exists) {
+                                printf("sprite draw\n");
                                 RDrawImage(sprite->frames[(( int )inst.image_index) % sprite->frameCount], inst.x, inst.y, inst.image_xscale, inst.image_yscale, inst.image_angle, inst.image_blend, inst.image_alpha);
                             }
+
+
                             else {
                                 // Tried to draw non-existent sprite
                                 return false;
+                                printf("false\n");
                             }
                         }
                     }
                 }
                 else {
                     if (inst.depth < currentDepth && inst.depth > nextDepth) nextDepth = inst.depth;
+                    printf("inst depth\n");
                 }
             }
         }
         if (nextDepth == INT_MIN) break;
     }
-    */
+    
 
     // Draw all tiles and instances
     if (!InstanceList::DrawEverything()) return false;
@@ -510,6 +520,7 @@ bool GameFrame() {
             for (int startY = (bg.tileVert ? (bg.y - stretchedH) : 0); startY < ( int )room->height; startY += stretchedH) {
                 for (int startX = (bg.tileHor ? (bg.x - stretchedW) : 0); startX < ( int )room->width; startX += stretchedW) {
                     RDrawImage(b->image, startX, startY, scaleX, scaleY, 0, 0xFFFFFFFF, 1);
+                    printf("draw foreground\n");
                 }
             }
         }
